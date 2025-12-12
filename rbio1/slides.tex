@@ -1,0 +1,596 @@
+% Copyright (c) 2022 by Lars Spreng
+% This work is licensed under the Creative Commons Attribution 4.0 International License. 
+% To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% You can add your packages and commands to the loadslides.tex file. 
+% The files in the folder "styles" can be modified to change the layout and design of your slides.
+% I have included examples on how to use the template below. 
+% Some of these examples are taken from the Metropolis template.
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+\documentclass[
+11pt,notheorems,hyperref={pdfauthor=whatever}
+]{beamer}
+
+\input{loadslides.tex} % Loads packages and some defined commands
+
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+
+
+\title[
+% Text entered here will appear in the bottom middle
+]{rbio1 - training scientific reasoning LLMs with biological world models as soft verifiers}
+
+
+\author[
+% Text entered here will appear in the bottom left corner
+]{
+    Istrate \textit{et al.}
+}
+
+\institute{Chan Zuckerberg Initative}
+\date{August 22, 2025}
+
+\begin{document}
+
+% Generate title page
+{
+\setbeamertemplate{footline}{} 
+\begin{frame}
+  \titlepage
+\end{frame}
+}
+\addtocounter{framenumber}{-1}
+
+% You can declare different parts as a parentof sections
+
+\section{Abstract}
+
+\begin{frame}
+Reasoning Models are typically trained against verification 
+mechanisms in formally specified systems such as code or symbolic 
+math. However, in open domains like biology, we do not generally 
+have access to exact rules facilitating formal verification at scale, 
+and oftentimes resolve to testing hypotheses in the lab to assess the 
+validity of a prediction. 
+
+Verification by performing real experiments is slow, expensive, and 
+inherently does not scale with computation.
+
+In this work, we show that one can use \textbf{world models of biology or 
+other prior knowledge as approximate oracles over biological 
+knowledge to utilize as soft verification to train reasoning systems 
+without the need for additional experimental data.}
+
+We introduce rbio1, \textbf{a reasoning model for biology that is post-trained 
+from a pretrained LLM using reinforcement learning and uses learned 
+models of biology to obtain biological knowledge for verification 
+during training.} We show that soft verification successfully distills 
+biology world models into rbio, at the example of achieving leading 
+performance on perturbation prediction against the PerturbQA 
+benchmark compared to state-of-the-art models; we demonstrate the 
+benefits of compositions of verifiers to learn more general rbio 
+models. 
+
+We believe rbio provides a proof of concept that demonstrates that 
+predictions from bio-models can be used to train powerful reasoning 
+models using simulations, rather than experimental data, as a new 
+training paradigm.
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Introduction: Motivation and Core Idea}
+
+\begin{itemize}
+  \item \textbf{Problem:} Experimental biological supervision does not scale
+  \begin{itemize}
+    \item Experiments are expensive, slow, and sparse
+    \item Many biologically meaningful questions lack labels
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Limitation of current LLM training}
+  \begin{itemize}
+    \item Supervised fine-tuning assumes access to ground truth
+    \item Fails when labels are unavailable or incomplete
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Key insight}
+  \begin{itemize}
+    \item Biology already exists in multiple forms:
+    \begin{itemize}
+      \item Experiments
+      \item Predictive models (simulations)
+      \item Curated knowledge
+    \end{itemize}
+    \item These can act as \textbf{verifiers}, not labels
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Core idea of the paper}
+  \begin{itemize}
+    \item Replace ground truth with \textbf{verification signals}
+    \item Learn biological reasoning via \textbf{reinforcement learning}
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\section{The overal structure of rbio1}
+\begin{frame}
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=1.0\textwidth]{figures/rbio1-overview.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.9\textwidth]{figures/rbio1-overview-verification.png}
+    \end{figure}
+
+    \begin{itemize}
+        \item \texttt{input a} and \texttt{input b}?
+        \item What are the hard/soft verifiers?
+        \item How is the reward computed?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Table 1: the key to understand the rest of paper}
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures/rbio1-table1.png}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{How the training works}
+    \begin{figure}[htbp]
+        \centering
+        \includegraphics[width=0.5\textwidth]{figures/rbio1-overview-training.png}
+    \end{figure}
+\end{frame}
+
+\section{Verifiers for rbio1}
+\begin{frame}
+\begin{table}[ht]
+\footnotesize
+\renewcommand{\arraystretch}{0.9}
+
+\centering
+\begin{tabular}{|c|l|l|l|l|l|c|l|}
+\hline
+ \textbf{Verifier source} & \textbf{Output form} & \textbf{Compared against} & \textbf{Reward meaning} & \textbf{Strength of truth} & \textbf{Why it counts as truth} \\
+\hline
+Experimental data  & Binary label & LLM yes/no & Correctness & $\star \star \star \star \star$  & Direct observation \\
+ Virtual Cell Model  & Probability & LLM yes/no & Consistency & $\star \star \star \star$  & Learned biological structure \\
+Knowledge Source  & Text & LLM text & Alignment & $\star \star \star$  & Expert consensus \\
+\hline
+\end{tabular}
+\caption{Truth verification signals used in Sections 2.2--2.4}
+\end{table}
+
+\end{frame}
+
+\section{Equations for rbio1}
+\begin{frame} 
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+
+\begin{tabularx}{\textwidth}{|
+  >{\raggedright\arraybackslash}p{3.0cm}|
+  >{\raggedright\arraybackslash}X|
+  >{\raggedright\arraybackslash}X|
+  >{\raggedright\arraybackslash}X|
+  >{\raggedright\arraybackslash}p{3.3cm}|
+}
+\hline
+\textbf{Mechanism} &
+\textbf{Purpose} &
+\textbf{What it stabilizes} &
+\textbf{Failure mode without it} &
+\textbf{One idea / equation} \\
+\hline
+
+GRPO (2.1) &
+Learn from rewards &
+Policy updates &
+No learning &
+$\hat{A}_i=\dfrac{r_i-\mu}{\sigma}$ \\
+
+\hline
+Composable rewards (2.5) &
+Combine signals &
+Generalization &
+Overfitting to one truth &
+$r=\sum_j r_j$ \\
+
+\hline
+Score normalization (2.6) &
+Align reward scales &
+Optimization stability &
+Reward collapse &
+Piecewise min--max $\rightarrow [0,1]$ \\
+\hline
+\end{tabularx}
+
+
+\end{frame}
+
+\begin{frame}{Metric definitions}
+  \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/rbio1-metric.png}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Experimental setup}
+  \begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.3\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/rbio1-training-setup.png}
+      \vspace{0.4em}
+    \end{minipage}\hfill
+    \begin{minipage}{0.7\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{figures/rbio1-all-cell-lines.png}
+      \vspace{0.4em}
+    \end{minipage}
+  \end{figure}
+\end{frame}
+
+\section{Results summary}
+
+\begin{frame}{Paper Roadmap by Figure}
+
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{tabularx}{\textwidth}{
+  l
+  c
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+}
+\toprule
+\textbf{Figure} &
+\textbf{Sec.} &
+\textbf{Core question} &
+\textbf{Training detail (specific point)} &
+\textbf{Purpose} &
+\textbf{Conclusion} \\
+\midrule
+
+Fig.~2 & 3.3 &
+Can soft verification (MLP) match training on experimental labels on-task? &
+Train rbio using \textbf{MLP soft scores (VCM)} instead of EXP labels; leave-one-out cell line logic &
+Validate \textbf{VCM-as-verifier} for perturbation prediction &
+Soft-verifier training can be competitive with EXP training (esp.\ recall/TPR tradeoffs) \\
+
+Fig.~3 & 3.4 &
+Can off-task VCM biology transfer to perturbation prediction? &
+Train on \textbf{Transcriptformer co-expression / PMI} prompts; test on perturbation &
+Show \textbf{transfer} from general biology signals &
+Off-task biological tutoring improves downstream perturbation behavior \\
+
+Fig.~4 & 3.5 &
+Do multiple verifiers improve results vs.\ single verifiers? &
+Train with \textbf{combinations of TF + GO + MLP} (optionally ESM); prompt mix skewed by dataset density &
+Demonstrate \textbf{composable verification} at scale &
+Adding diverse verification sources improves generalization/performance \\
+
+Fig.~5 & 3.5 &
+What happens in \textbf{ablation-style additions}? Any surprises? &
+Stepwise addition of verifiers; some cases where GO hurts in certain combos &
+Deepen \textbf{composition analysis} beyond Fig.~4 &
+Generally additive gains, with some counterintuitive interactions flagged \\
+
+Fig.~6 & 3.6 &
+Does chain-of-thought prompting at inference boost test performance? &
+\textbf{No retraining}; only test-time prompting style changes &
+Show reasoning helps at inference &
+CoT improves performance without tools or extra data \\
+
+\bottomrule
+\end{tabularx}
+
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}{Conclusion: What This Paper Shows}
+
+\begin{itemize}
+  \item \textbf{Biological reasoning can be learned without experiments}
+  \begin{itemize}
+    \item Soft verification from models and knowledge is sufficient
+    \item Experimental data is no longer the only training signal
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Supervision need not be binary ground truth}
+  \begin{itemize}
+    \item Experiments provide hard labels
+    \item Models and knowledge provide soft, graded signals
+    \item All can guide learning via verification
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Compositional verification works}
+  \begin{itemize}
+    \item Multiple weak signals outperform any single source
+    \item Biological supervision is additive, not exclusive
+  \end{itemize}
+
+  \vspace{0.3em}
+
+  \item \textbf{Reasoning matters at training and inference}
+  \begin{itemize}
+    \item Reinforcement learning aligns reasoning with biology
+    \item Chain-of-thought improves test-time performance
+  \end{itemize}
+
+  
+\end{itemize}
+
+\end{frame}
+
+\section{Rebuttal Overview}
+
+\begin{frame}{Rebuttal Overview: Main Criticism Themes}
+
+\begin{itemize}
+  \item \textbf{Verifier fidelity \& noise:} are soft verifiers reliable or do they amplify errors?
+  \item \textbf{Generality:} is evidence limited to PerturbQA and closely-coupled rewards?
+  \item \textbf{RL vs supervised baseline:} is GRPO actually needed beyond imitation?
+  \item \textbf{Clarity \& reproducibility:} missing MLP details, unclear equations, missing compute.
+  \item \textbf{Metrics/statistical claims:} what is ``SOTA'' under class imbalance and data fraction?
+\end{itemize}
+
+\vspace{0.4em}
+\textbf{Author strategy (from official rebuttal):}
+\begin{itemize}
+  \item ``\emph{new controlled-noise, ablation, composition, and cross-domain experiments}'' 
+  \item ``\emph{detailed training, scaling, and reproducibility analyses}'' (all in SI)
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Reviewer cju1: Verifier Fidelity \& Miscalibration}
+
+\textbf{Reviewer cju1 (Weaknesses, verbatim):}
+\begin{quote}
+The approach assumes biology models and GO signals are accurate enough to guide RL, 
+but the paper does not analyze sensitivity to verifier fidelity or miscalibration...
+\end{quote}
+\begin{quote}
+There is no analysis of whether RL amplifies verifier errors, no plot of verifier vs model accuracy on held-out perturbations, 
+and no check of verifier disagreement.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+...controlled-noise experiments ... where MLP verifier predictions were progressively randomized... 
+rbio performance decreases smoothly and remains well above the Qwen 2.5-3B baseline until signals are fully random...
+\end{quote}
+\begin{quote}
+...confidence--performance analysis ... confirms that recall increases with verifier confidence...
+indicating that rbio learns a stable biological prior rather than overfitting to verifier noise.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{What they added (SI):} controlled-noise (A.4.1), reward ablations (A.4.2), confidence analysis (A.4.3), cross-verifier agreement (A.5).
+
+\vspace{0.2em}
+\textbf{Takeaway for students:} When criticized for ``oracle quality'', add \emph{controlled-noise} + \emph{error amplification checks}.
+
+\end{frame}
+
+\begin{frame}{Reviewer cju1: Are Gains Just Generic RL?}
+
+\textbf{Reviewer cju1 (Weakness, verbatim):}
+\begin{quote}
+It is unclear whether generic RL or RLAIF signals (format, helpfulness, self-consistency) would yield similar gains.
+This weakens the claim that the biology-specific rewards are the true driver of improvement.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+Reward ablations ... show that biological-answer rewards dominate performance gains, while format- or mention-only terms have minimal effect...
+\end{quote}
+\begin{quote}
+...we compare ... DeepSeek R1, Qwen Instruct, and OpenAI OSS ... these models fail to reproduce the gains achieved by biology-grounded rewards...
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} If reviewers suspect ``it’s just RL regularization'', do:
+\begin{itemize}
+  \item ablation: domain reward vs format/mention rewards
+  \item stronger external baselines: instruction-tuned / RL reasoning models
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reviewer jVCL: Clarity, Biological Setup, and Ill-Defined Equations}
+
+\textbf{Reviewer jVCL (Weaknesses, verbatim):}
+\begin{quote}
+The exposition needs to be improved strongly: the biological question and setup is not explained...
+\end{quote}
+\begin{quote}
+Key details are not included in the paper: how was the tiny MLP trained (input / output / loss?)...
+\end{quote}
+\begin{quote}
+Equations are often nonsensical / unhelpful / ill-defined... The paper cannot be reimplemented...
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+We now explicitly describe the PerturbQA benchmark in A.1...
+\end{quote}
+\begin{quote}
+We added full architecture and hyperparameters ... and ... describe how the MLP’s probabilistic outputs serve as rewards during GRPO optimization.
+\end{quote}
+\begin{quote}
+We ... re-worked the Methods section for clarity---simplifying notation, improving equation definitions...
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} Clarity rebuttals must add \emph{reimplementation-critical details}: dataset protocol, model IO/loss, algorithms, and simplified notation.
+
+\end{frame}
+
+\begin{frame}{Reviewer jVCL: Generalization Beyond PerturbQA}
+
+\textbf{Reviewer jVCL (Weakness, verbatim):}
+\begin{quote}
+All experiments are within PERTURBQA... Even a smaller secondary biology reasoning task would make the generality claim more credible.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+...zero-shot disease-state prediction ... shows rbio nearly matches SCVI ... and clearly outperforms Qwen2.5-3B...
+\end{quote}
+\begin{quote}
+...demonstrating biological reasoning transfer beyond perturbation tasks.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} To rebut ``narrow benchmark'' critiques:
+\begin{itemize}
+  \item add a \textbf{cross-domain} experiment (even if smaller)
+  \item make it \textbf{zero-shot} to strengthen the generalization claim
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reviewer tnsY: Reproducibility and Code Release}
+
+\textbf{Reviewer tnsY (verbatim):}
+\begin{quote}
+I have some concerns regarding the reproducibility of the results given that the code is not released...
+\end{quote}
+\begin{quote}
+...it is the release of the codebase that will lead me to increase my score.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+We have released an anonymous repository ... that reproduces the MLP-verifier experiments and provides an end-to-end example...
+\end{quote}
+\begin{quote}
+...clarified the MLP architecture (activation functions, losses, and hyperparameters)...
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} A reproducibility-focused reviewer can be ``won'' by:
+\begin{itemize}
+  \item minimal end-to-end repo
+  \item architecture + hyperparameters
+  \item algorithms and reward computation details
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reviewer tnsY: Metrics, Significance, and ``SOTA'' Claims}
+
+\textbf{Reviewer tnsY (verbatim):}
+\begin{quote}
+...claim of state-of-the-art performance ... when the models are trained with 1/5 of the data sample...
+SUMMER appears to perform better on the TNR metric?
+\end{quote}
+\begin{quote}
+...difference in F1-score and the MCC metric does not appear to be statistically significant?
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+The PerturbQA datasets are class-imbalanced... identifying true positive perturbations is biologically more important...
+We therefore emphasize F1, Balanced Accuracy, and MCC...
+\end{quote}
+\begin{quote}
+...SUMMER’s higher TNR reflects a different recall--specificity trade-off rather than superior overall accuracy.
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} When ``SOTA'' is questioned, rebut by:
+\begin{itemize}
+  \item explicitly arguing \textbf{which metric matches the scientific objective}
+  \item explaining trade-offs (TPR vs TNR), not just headline numbers
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reviewer AHen: Compute, Scaling, and Baseline Interpretation}
+
+\textbf{Reviewer AHen (verbatim):}
+\begin{quote}
+...computational resources required are not reported...
+\end{quote}
+\begin{quote}
+GEARS performs surprisingly poorly... Is there any explanation or analysis regarding this?
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Authors (Response, verbatim highlights):}
+\begin{quote}
+...Training used ... on 8×H100 GPUs for $\sim$10 days... batch\_size=4, learning\_rate=5e-6...
+\end{quote}
+\begin{quote}
+GEARS’s lower F1 arises from an extreme TNR bias---its high specificity (0.997) is offset by low recall...
+\end{quote}
+
+\vspace{0.4em}
+\textbf{Takeaway for students:} Always report:
+\begin{itemize}
+  \item compute budget + steps + key hyperparameters
+  \item learning curves / scaling plots
+  \item explain surprising baselines (metric mismatch, thresholding effects)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Meta: Why This Rebuttal Worked (Writing Guidance)}
+
+\begin{itemize}
+  \item They \textbf{matched criticisms with new experiments} (noise, ablations, agreement, cross-domain)
+  \item They \textbf{moved from claims to diagnostics} (confidence vs performance, verifier coherence)
+  \item They \textbf{fixed reproducibility directly} (repo + algorithms + hyperparams)
+  \item They \textbf{clarified evaluation philosophy} (imbalance, objective-aligned metrics)
+  \item They added \textbf{stronger baselines} to rule out ``generic RL'' explanations
+\end{itemize}
+
+\vspace{0.4em}
+\textbf{Teaching takeaway:}
+\begin{itemize}
+  \item A strong rebuttal is not persuasion---it is \textbf{additional evidence} and \textbf{reduced ambiguity}.
+\end{itemize}
+
+\end{frame}
+
+\end{document}
