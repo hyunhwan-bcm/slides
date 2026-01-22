@@ -83,8 +83,9 @@
 \textbf{Size} & \textbf{Characteristics} & \textbf{Hardware Reality} \\
 \hline
 8B & Fast, capable of basic tools, but lacks nuance. & Runs on any modern GPU/CPU. \\
-20B--35B & The Sweet Spot. Reliable reasoning \& instruction following. & Fits on a single high-end consumer GPU (24GB VRAM). \\
-70B+ & State-of-the-art knowledge \& logic. & Dual consumer GPUs or Mac Studio required (not just A100). \\
+20B--30B & The Sweet Spot. Reliable reasoning \& instruction following. & Fits on a single high-end consumer GPU (24GB VRAM). \\
+70B--100B & Provide decent responses & A100 or Mac Studio required (not just A100). \\
+300B--500B & State-of-the-art knowledge \& logic. & 512GB VRAM or more required. \\
 \hline
 \end{tabular}%
 }
@@ -143,6 +144,18 @@
 \end{frame}
 
 \begin{frame}[fragile]
+\frametitle{Why llama.cpp? Not Ollama?}
+
+\href{https://ollama.com/}{Ollama} is great for quick experiments, but \href{https://github.com/ggml-org/llama.cpp}{llama.cpp} offers more control for production use cases.
+
+\begin{itemize}
+\item \textbf{Performance}: Faster than Ollama for raw inference.
+\item \textbf{Concurrency}: Better support for concurrent requests.
+\item \textbf{Flexibility}: Granular configuration (many settings are hidden in Ollama).
+\item \textbf{Quantization}: Better control (Ollama's quantized versions can behave oddly).
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile]
 \frametitle{Downloading the Model}
 
 \begin{minted}{bash}
@@ -174,9 +187,8 @@ hf download \
 
 \begin{itemize}
 \item Quantization reduces model size and increases throughput.
-\item Higher-precision quantization (e.g., Q8\_0) preserves accuracy better but is slower and uses more memory.
-\item Lower-precision quantization (e.g., Q4\_K\_S or Q2) is faster and smaller but can reduce accuracy.
-\item Choose the level based on your hardware and accuracy requirements: higher preserves better accuracy but is slower — trade off accordingly.
+\item Higher-precision (e.g., Q8\_0) preserves accuracy better but is slower and uses more memory.
+\item Lower-precision (e.g., Q4\_K\_S or Q2) is faster but can reduce accuracy.
 \end{itemize}
 
 \end{frame}
@@ -246,6 +258,14 @@ hf download \
 % ================================================================================
 
 \begin{frame}[fragile]
+\frametitle{Installing Python Dependencies}
+
+\begin{minted}{bash}
+pip install openai fastmcp httpx
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
 \frametitle{The Drop-In Replacement Pattern}
 
 \inputminted{python}{code/10_drop_in.py}
@@ -256,7 +276,6 @@ hf download \
 
 \inputminted{python}{code/11_lab2_client.py}
 
-\textbf{Run it:} \texttt{python test\_local.py}
 \end{frame}
 
 \begin{frame}[fragile,shrink=20]
@@ -438,23 +457,70 @@ if __name__ == "__main__":
 \end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Tools/Function Calling vs. MCP}
+
+\begin{center}
+{\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{2.2cm} p{6cm} p{6cm}}
+\hline
+\textbf{Feature} & \textbf{Tools / Function Calling} & \textbf{Model Context Protocol (MCP)} \\
+\hline
+\textbf{Role} & The capability to execute code. & The standard for connecting tools to AIs. \\
+\textbf{Integration} & \textbf{1-to-1:} Custom code for each model/app. & \textbf{M-to-N:} One server connects to \textit{any} client. \\
+\textbf{Portability} & Low. Rewriting often needed for different schemas. & High. Protocol abstracts model differences. \\
+\textbf{Deployment} & Monolithic (same codebase as bot). & Distributed/Modular (separate process/service). \\
+\textbf{Primary Use} & Single-purpose bots or scripts. & Complex ecosystems, "plug and play" data. \\
+\hline
+\end{tabular}%
+}
+}
+\end{center}
+\end{frame}
 % ================================================================================
-\section{MARRVEL-MCP: Rare Disease Discovery}
+\section{MARRVEL-MCP: A Context-Engineered Natural-Language Query-to-Response Interface for Mendelian Disease Discovery}
 % ================================================================================
 
 \begin{frame}
-\frametitle{Our Latest Work: MARRVEL-MCP — \textit{Everton et al.} (\textit{2025, in revision})}
+\frametitle{What is \href{https://marrvel.org/}{MARRVEL}?}
+\begin{columns}[T]
+\begin{column}{0.40\textwidth}
+    \textbf{MARRVEL}:
+    {\scriptsize
+    \begin{itemize}
+        \item \textbf{Aggregated Resources}: Integration of human databases (OMIM, ExAC, ClinVar, etc.) and model organism databases (FlyBase, MGI, SGD, etc.).
+        \item \textbf{Variant Prioritization}: Facilitates using cross-species alignments to prioritize rare human gene variants.
+    \end{itemize}
+    }
+    
+    \vspace{0.3cm}
+    \textbf{The Limitation:}
+    {\scriptsize
+    \begin{itemize}
+        \item \textbf{Identifier-Only}: Historically, searches are restricted to specific identifiers (gene symbols, protein IDs) of genes/variants.
+    \end{itemize}
+    }
+\end{column}
+\begin{column}{0.70\textwidth}
+    \begin{center}
+    \includegraphics[width=\textwidth]{figures/marrvel-landing.png}
+    \end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}
+\frametitle{Our Latest Work: MARRVEL-MCP — \textit{Everton et al.,} (\textit{2025, in revision})}
 
 \begin{columns}[T,onlytextwidth]
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.4\textwidth}
         \textbf{Abstracting Complexity in Genetics:}
         \begin{itemize}
-        \item \textbf{Paper:} "A Context-Engineered Natural-Language Query-to-Response Interface for Mendelian Disease Discovery"
-        \item \textbf{Impact:} Enables clinicians/researchers to query 35+ genetics databases using plain English.
+        \item \textbf{What MARRVEL-MCP offers} Enables clinicians/researchers to query 35+ genetics databases using plain English.
         \item \textbf{Open Source:} Full MCP server implementation available on GitHub.
         \end{itemize}
     \end{column}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.6\textwidth}
         \begin{center}
         \includegraphics[width=0.85\textwidth]{figures/marrvel_mcp_biorxiv.png}
         \end{center}
