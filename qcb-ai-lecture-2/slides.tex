@@ -1,0 +1,649 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Modern theme
+\usetheme{metropolis}
+\usecolortheme{owl}
+
+% Fonts
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{upquote}  % Ensures straight quotes in code
+\usepackage{graphicx}
+
+% Minted for syntax highlighting
+\usepackage{minted}
+\usemintedstyle{monokai}
+\setminted{
+    fontsize=\scriptsize,
+    frame=lines,
+    framesep=1.5mm,
+    baselinestretch=1.0,
+    bgcolor=black!90,
+    linenos=true,
+    numbersep=5pt,
+    breaklines=true,
+    breakanywhere=false,
+    texcomments=false,
+    mathescape=false,
+    xleftmargin=0pt,
+    xrightmargin=0pt
+}
+
+% Adjust frame margins
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\title{Local AI, Agents, and the \texttt{gpt-oss-20b} Stack}
+\subtitle{Building Useful AI Tools with Privacy and Control}
+\author{Hyun-Hwan Jeong}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}[plain]
+\titlepage
+\end{frame}
+
+% ================================================================================
+\section{Welcome}
+% ================================================================================
+
+\begin{frame}[fragile]
+\frametitle{What You'll Build Today}
+
+\inputminted{python}{code/01_intro.py}
+
+\textbf{You will:}
+\begin{itemize}
+\item Run 20B parameter models on your laptop
+\item Build tool-calling agents from scratch
+\item Deploy autonomous coding assistants
+\item Save thousands in API costs
+\end{itemize}
+\end{frame}
+
+% ================================================================================
+\section{Foundation}
+% ================================================================================
+
+\begin{frame}
+\frametitle{The Model Landscape}
+
+\begin{center}
+{\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{2.2cm} p{6.6cm} p{6.6cm}}
+\hline
+\textbf{Size} & \textbf{Characteristics} & \textbf{Hardware Reality} \\
+\hline
+8B & Fast, capable of basic tools, but lacks nuance. & Runs on any modern GPU/CPU. \\
+20B--35B & The Sweet Spot. Reliable reasoning \& instruction following. & Fits on a single high-end consumer GPU (24GB VRAM). \\
+70B+ & State-of-the-art knowledge \& logic. & Dual consumer GPUs or Mac Studio required (not just A100). \\
+\hline
+\end{tabular}%
+}
+}
+\end{center}
+\end{frame}
+
+\begin{frame}
+    
+\vspace{0.2cm}
+\frametitle{\texttt{gpt-oss-20b} is the sweet spot:}
+
+\begin{itemize}
+\item Fits on consumer hardware (with MoE and quantization)
+\item Production-grade reasoning (comparable with o3-mini)
+\item Apache 2.0 license (making it permissible for commercial use, modification, and distribution.)
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Hardware Requirements}
+
+\textbf{Option 1 (NVIDIA):}
+\begin{itemize}
+\item RTX 3090/4090 (24GB VRAM)
+\item Inference: $\sim$40 tokens/sec
+\end{itemize}
+
+\textbf{Option 2 (Apple Silicon):}
+\begin{itemize}
+\item M2/M3 with 32GB+ RAM
+\item Inference: $\sim$25 tokens/sec, can be better with llama.cpp with quantization
+\end{itemize}
+
+\textbf{Option 3 (CPU Only):}
+\begin{itemize}
+\item 32GB RAM minimum
+\item Inference - slow but works: $\sim$5-10 tokens/sec
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Key Privacy Benefit:} Your data \textbf{never leaves your machine}. No API calls, no cloud logging, complete data control.
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Installing llama.cpp}
+
+\textbf{Method 1: Pre-built Binaries (Fast)}
+
+\inputminted{bash}{code/03_install_brew.sh}
+
+\textbf{Method 2: Build from Source (For GPU)}
+
+\inputminted{bash}{code/04_install_source.sh}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Downloading the Model}
+
+\begin{minted}{bash}
+# Using huggingface-cli (recommended)
+pip install huggingface-hub
+
+hf download \
+  ggml-org/gemma-3-4b-it-GGUF \
+  gemma-3-4b-it-Q4_K_M.gguf \
+  --local-dir ./models 
+
+\end{minted}
+
+\vspace{0.15cm}
+\begin{itemize}
+\item \textbf{Expected size:} $\sim$2. GB
+\item \textbf{Download time:} 1 minute (depends on connection)
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Quantization: Speed vs Accuracy}
+
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figures/gemma-3-4b-it-GGUF.png}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+\item Quantization reduces model size and increases throughput.
+\item Higher-precision quantization (e.g., Q4\_K\_M) preserves accuracy better but is slower and uses more memory.
+\item Lower-precision quantization (e.g., Q4\_K\_S or Q2) is faster and smaller but can reduce accuracy.
+\item Choose the level based on your hardware and accuracy requirements: higher preserves better accuracy but is slower — trade off accordingly.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lab 1: First Inference}
+
+\textbf{Running the Model (CLI Mode)}
+
+\inputminted{bash}{code/06_lab1_inference.sh}
+
+\textbf{Flag breakdown:}
+\begin{itemize}
+\item \texttt{-m}: Model path
+\item \texttt{-p}: Prompt
+\item \texttt{-n}: Max tokens to generate
+\item \texttt{-ngl}: GPU layers (99 = all)
+\item \texttt{-c}: Context window
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Server Mode: The Game Changer}
+
+\textbf{Starting llama-server}
+
+\inputminted{bash}{code/07_start_server.sh}
+
+%\vspace{0.2cm}
+%\textbf{Now your model is an API server!}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Server Mode: The Game Changer}
+
+\textbf{Starting llama-server (gpt-oss-20b)}
+
+\inputminted{bash}{code/07_start_server_oss.sh}
+
+\vspace{0.2cm}
+\textbf{Now your model is an API server!}
+\end{frame}
+
+\begin{frame}
+\frametitle{\texttt{llama-server} Features - OpenWebUI Integration}
+
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figures/openwebui.png}
+\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Testing the Server}
+
+\inputminted{bash}{code/08_test_server.sh}
+
+\textbf{Response:}
+\inputminted{text}{code/09_test_response.txt}
+\end{frame}
+
+
+% ================================================================================
+\section{Python Integration}
+% ================================================================================
+
+\begin{frame}[fragile]
+\frametitle{The Drop-In Replacement Pattern}
+
+\inputminted{python}{code/10_drop_in.py}
+\end{frame}
+
+\begin{frame}[fragile,shrink=10]
+\frametitle{Lab 2: Your First Local Client}
+
+\inputminted{python}{code/11_lab2_client.py}
+
+\textbf{Run it:} \texttt{python test\_local.py}
+\end{frame}
+
+\begin{frame}[fragile,shrink=20]
+\frametitle{Streaming Responses}
+
+\inputminted{python}{code/12_streaming.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Temperature and Sampling}
+
+\inputminted{python}{code/13_temperature.py}
+
+\begin{itemize}
+\item \textbf{For code:} Use 0.2-0.4
+\item \textbf{For creative writing:} Use 0.7-1.0
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Recommended Inference Settings - for \texttt{gpt-oss-20b}}
+
+\begin{itemize}
+    \item \textbf{Sampling:} \texttt{temperature=1.0}, \texttt{top\_p=1.0}, \texttt{top\_k=0} (or try \texttt{top\_k=100} for experimentation)
+    \item \textbf{Context:} Recommended minimum context: \texttt{16\,384}
+    \item \textbf{Max window:} Maximum context length: \texttt{131\,072}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+
+\frametitle{Lab 3: Chat Loop with Memory}
+
+\inputminted{python}{code/14_lab3_chat.py}
+\end{frame}
+
+% ================================================================================
+\section{Tool Calling \& Agents}
+% ================================================================================
+
+\begin{frame}[shrink=10]
+\frametitle{What is Tool Calling?}
+
+\textbf{Traditional LLM:}
+\begin{itemize}
+\item User: "What's the weather in NYC?"
+\item LLM: "I don't have access to real-time data..."
+\end{itemize}
+
+\textbf{Tool-Calling LLM:}
+\begin{itemize}
+\item User: "What's the weather in NYC?"
+\item LLM: $\rightarrow$ Calls \texttt{weather\_api("NYC")}
+\item LLM: "It's 72\textdegree F and sunny in New York City."
+\end{itemize}
+
+\textbf{The LLM decides WHEN and HOW to use tools.}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tool Schema Structure}
+
+\inputminted{python}{code/15_tool_schema.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Implementing Python Functions}
+
+\inputminted{python}{code/16_weather_function.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Tool-Calling Request}
+
+\inputminted{python}{code/17_tool_request.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lab 4: Complete Tool-Calling Agent}
+
+\inputminted{python}{code/18_lab4_tools.py}
+\end{frame}
+
+\begin{frame}[fragile,shrink=5]
+\frametitle{Agent Loop Implementation}
+
+\inputminted{python}{code/19_agent_loop.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Running the Agent}
+
+\begin{minted}{python}
+# If the script doesn't expose an entrypoint, add a simple main:
+
+def main():
+    result = run_agent("What is 2 + 2 * 3?")
+    print(result)
+
+if __name__ == "__main__":
+    main()
+\end{minted}
+\end{frame}
+
+% ================================================================================
+\section{Advanced Agent Patterns}
+% ================================================================================
+
+\begin{frame}[fragile,shrink=10]
+\frametitle{Multi-Tool Agent: File System Navigator}
+
+\inputminted{python}{code/20_filesystem_tools.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lab 5: Autonomous Code Analyzer}
+
+\inputminted{python}{code/21_lab5_analyzer.py}
+\end{frame}
+
+% ================================================================================
+\section{Model Context Protocol (MCP)}
+% ================================================================================
+
+\begin{frame}
+\frametitle{What is MCP?}
+
+\textbf{Model Context Protocol} enables AI models to:
+\begin{itemize}
+\item Access external tools and data sources
+\item Follow standardized interfaces
+\item Integrate with your applications
+\end{itemize}
+
+\vspace{0.2cm}
+
+\textbf{Why use FastMCP?}
+\begin{itemize}
+\item Minimal boilerplate code
+\item Decorator-based tool definition
+\item Built-in HTTP client with retry logic
+\item Perfect for data fetching services
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Building Your First MCP Server}
+
+\inputminted{python}{code/26_test_mcp_example.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Connecting to Claude Desktop}
+
+\textbf{Configuration file:} \texttt{\textasciitilde/Library/Application Support/Claude/claude\_desktop\_config.json}
+
+\inputminted{json}{code/27_claude_mcp_setup.json}
+
+\vspace{0.2cm}
+\begin{itemize}
+\item Claude Desktop acts as the \textbf{MCP Client}.
+\item It automatically spawns the server process and connects via stdio.
+\item Tools appear directly in the Claude UI.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{MCP in Action}
+
+\begin{center}
+\includegraphics[width=0.43\textwidth]{figures/claude-mcp-configure.png}
+\hfill
+\includegraphics[width=0.43\textwidth]{figures/mcp-call-screenshot.png}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Left:} The MCP server is recognized and running in Claude's settings.
+\item \textbf{Right:} Claude uses the \texttt{get\_abstract\_by\_pmcid} tool to answer a query.
+\end{itemize}
+\end{frame}
+
+% ================================================================================
+\section{MARRVEL-MCP: Rare Disease Discovery}
+% ================================================================================
+
+\begin{frame}
+\frametitle{Our Latest Work: MARRVEL-MCP — \textit{Everton et al.} (\textit{2025, in revision})}
+
+\begin{columns}[T,onlytextwidth]
+    \begin{column}{0.5\textwidth}
+        \textbf{Abstracting Complexity in Genetics:}
+        \begin{itemize}
+        \item \textbf{Paper:} "A Context-Engineered Natural-Language Query-to-Response Interface for Mendelian Disease Discovery"
+        \item \textbf{Impact:} Enables clinicians/researchers to query 35+ genetics databases using plain English.
+        \item \textbf{Open Source:} Full MCP server implementation available on GitHub.
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.85\textwidth]{figures/marrvel_mcp_biorxiv.png}
+        \end{center}
+    \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{System Architecture}
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/MARRVEL-MCP.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{The tool Landscape: 35+ Specialized Tools across six categories}
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/MARRVEL-MCP-F1.png}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking Performance}
+
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/marrvel_mcp_pass_rate.png}
+\end{center}
+\end{column}
+\begin{column}{0.3\textwidth}
+\small
+\textbf{The "MCP Jump":}
+\begin{itemize}
+\item Vanilla LLMs (grey) fail on $>$70\% of complex genetics queries.
+\item LLM + MARRVEL-MCP (teal) achieves \textbf{near-perfect accuracy} (90-100\%) for 20B+ models.
+\item Even small models (e.g., 3B) become significantly more useful with MCP.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Accuracy vs. Model Size}
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{figures/marrvel_mcp_scaling.png}
+\end{center}
+
+\begin{itemize}
+\item \textbf{The Scaling Law:} MCP tools provide a massive baseline boost.
+\item \textbf{\texttt{gpt-oss-20b} (Local):} Outperforms the best "vanilla" cloud LLMs
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Case Study: Complex Multi-Step Reasoning}
+
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figures/marrvel_mcp_case_study.png}
+\end{center}
+
+\end{frame}
+
+% ================================================================================
+\section{Production Patterns}
+% ================================================================================
+
+\begin{frame}[fragile,shrink=5]
+\frametitle{Configuration Management}
+
+\inputminted{python}{code/22_config.py}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Lab 6: Agent Class}
+
+\inputminted{python}{code/23_lab6_production.py}
+\end{frame}
+
+% ================================================================================
+\section{Deployment}
+% ================================================================================
+
+\begin{frame}[fragile]
+\frametitle{Docker Deployment}
+
+\begin{minted}{text}
+FROM nvidia/cuda:12.1.0-devel-ubuntu22.04
+
+RUN apt-get update && apt-get install -y git build-essential
+
+WORKDIR /app
+RUN git clone https://github.com/ggerganov/llama.cpp.git
+WORKDIR /app/llama.cpp
+RUN make LLAMA_CUDA=1
+
+EXPOSE 8080
+
+CMD ["/app/llama.cpp/llama-server", \
+     "-m", "/app/models/gpt-oss-20b.Q4_K_M.gguf", \
+     "--host", "0.0.0.0", \
+     "--port", "8080", \
+     "-ngl", "99"]
+\end{minted}
+\end{frame}
+
+% ================================================================================
+\section{Conclusion}
+% ================================================================================
+
+\begin{frame}
+\frametitle{What You've Learned}
+
+\textbf{Technical Skills:}
+\begin{itemize}
+\item Running 20B parameter models on consumer hardware
+\item Building OpenAI-compatible inference servers
+\item Implementing tool-calling agents from scratch
+\item Production patterns for error handling and logging
+\item Deployment strategies for local AI
+\end{itemize}
+
+\vspace{0.2cm}
+
+\textbf{Architecture Patterns:}
+\begin{itemize}
+\item Drop-in replacement pattern (local API)
+\item ReAct agent loop implementation
+\item Model Context Protocol (MCP) for tool sharing
+\item Case Study: MARRVEL-MCP for clinical genetics
+\item Multi-tool coordination
+\end{itemize}
+
+\vspace{0.2cm}
+\end{frame}
+\begin{frame}
+\frametitle{What You've Learned}
+
+\textbf{Privacy \& Control:}
+\begin{itemize}
+\item Keep sensitive data on your own hardware
+\item No vendor lock-in or dependency
+\item Full transparency and auditability
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Cost Comparison}
+
+\textbf{Local gpt-oss-20b:}
+\begin{itemize}
+\item Unlimited tokens
+\item Break-even: $\sim$50M tokens
+\item \textbf{\textit{Privacy: Complete data control}}
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{For heavy users: Local pays off in weeks! And your data is yours alone.}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Resources}
+
+\textbf{Essential Links:}
+\begin{itemize}
+\item \href{https://github.com/ggerganov/llama.cpp}{llama.cpp GitHub}
+\item \href{https://huggingface.co/TheBloke/gpt-oss-20B-GGUF}{Model Download (HuggingFace)}
+\item \href{https://github.com/openai/openai-python}{OpenAI Python SDK}
+\item \href{https://www.langchain.com/langgraph}{LangGraph for Agents}
+\end{itemize}
+
+\textbf{Community:}
+\begin{itemize}
+\item \href{https://www.reddit.com/r/LocalLLaMA/}{r/LocalLLaMA}
+\item \href{https://huggingface.co/}{HuggingFace}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Thank You!}
+
+\begin{center}
+\Large
+Questions?\end{center}
+\end{frame}
+
+\end{document}

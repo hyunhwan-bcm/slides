@@ -1,0 +1,7 @@
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "choices": [{
+    "message": {"role": "assistant", "content": "Hello!"}
+  }]
+}
