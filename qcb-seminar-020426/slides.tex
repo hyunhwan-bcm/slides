@@ -1,0 +1,605 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Modern theme (same as qcb-ai-lecture-2)
+\usetheme{metropolis}
+\usecolortheme{owl}
+
+% Fonts
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{upquote}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multicol}
+
+% Adjust frame margins
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\title{Transforming Precision Medicine with Smarter, Faster, and More Trustworthy AI}
+\subtitle{QCB Seminar}
+\author{Hyun-Hwan Jeong, PhD\\Baylor College of Medicine}
+\date{February 4, 2026}
+
+\begin{document}
+
+% ================================================================================
+% TITLE SLIDE
+% ================================================================================
+\begin{frame}[plain,shrink=5]
+\titlepage
+\vfill
+{\footnotesize \url{https://hyunhwan-jeong.github.io/}}
+\end{frame}
+
+% ================================================================================
+\section{The AI Revolution}
+% ================================================================================
+
+\begin{frame}
+\frametitle{Public Interest Shifts in the Age of AI: A New Era Entering Our Lives}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth,height=0.7\textheight,keepaspectratio]{figures/slide02_Picture_8.png}
+\end{center}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide02_Picture_16.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{AI Is Already Transforming Healthcare (and the World)}
+
+\begin{center}
+\includegraphics[width=0.85\textwidth,height=0.75\textheight,keepaspectratio]{figures/slide03_Picture_4.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Beyond the Hype: The Limits and Environmental Impact of AI}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide04_Picture_4.png}
+\end{center}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide04_Picture_6.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[shrink=10]
+\frametitle{Beyond the Hype: Challenges of Using LLMs in Precision Medicine}
+
+\begin{columns}[T]
+\begin{column}{0.57\textwidth}
+{\small
+\textbf{Validity \& Reliability}
+\begin{itemize}
+\item LLMs can hallucinate, struggle with rare diseases, and may misinterpret subtle clinical signals.
+\item Ensuring consistent, safe, and evidence-based outputs is essential.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Data Privacy}
+\begin{itemize}
+\item Patient data is protected, fragmented, and heterogeneous---making it difficult to obtain large, high-quality datasets for training or fine-tuning securely.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Ultra-High-Throughput Processing Requirements}
+\begin{itemize}
+\item Precision Medicine involves genomic, clinical, imaging, and longitudinal data at massive scale, requiring LLMs to handle multimodal, high-volume inputs efficiently.
+\end{itemize}
+}
+\end{column}
+\begin{column}{0.38\textwidth}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/slide08_Picture_4.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ================================================================================
+\section{How Do We Make AI Smarter, Better, Faster... Greener?}
+% ================================================================================
+
+% ================================================================================
+\subsection{Smarter: Thinking LLMs}
+% ================================================================================
+
+\begin{frame}
+\frametitle{What It $\langle$thinks$\rangle$, It Becomes: o1 and DeepSeek-R1 in the Aha Era}
+
+\begin{columns}[T]
+\begin{column}{0.30\textwidth}
+\textbf{OpenAI o1}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide12_Picture_10.png}
+\end{center}
+\end{column}
+\begin{column}{0.30\textwidth}
+\textbf{DeepSeek-R1}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide12_Picture_12.png}
+\end{center}
+{\scriptsize \url{https://arxiv.org/pdf/2501.12948}}
+\end{column}
+\begin{column}{0.35\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide12_Picture_8.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[shrink=10]
+\frametitle{The Hidden Cost of Accuracy: More Runs, More Thinking, More Compute}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide13_Picture_3.png}
+\end{center}
+\vspace{0.1cm}
+{\small \textbf{Multiple Runs (Majority Vote) Are Required to Reach Peak Performance}}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide13_Picture_5.png}
+\end{center}
+\vspace{0.1cm}
+{\small \textbf{Thinking LLMs Consume Massive Compute}---More tokens (words) required}
+
+\vspace{0.2cm}
+{\scriptsize (Lee et al., ArXiv 2025)}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Why? The Same Prompt---Different Reasoning Paths}
+
+\begin{columns}[T]
+\begin{column}{0.65\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide14_Picture_4.png}
+\end{center}
+\end{column}
+\begin{column}{0.30\textwidth}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/slide14_Picture_5.png}
+\end{center}
+\vspace{0.2cm}
+{\scriptsize (Wang et al., ArXiv 2022)}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ================================================================================
+\subsection{Greener: ConSol}
+% ================================================================================
+
+\begin{frame}
+\frametitle{ConSol: Consistency Solver}
+
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figures/slide15_Picture_8.png}
+\end{center}
+
+\vspace{0.2cm}
+{\footnotesize \url{https://arxiv.org/abs/2503.17587}}
+\end{frame}
+
+\begin{frame}
+\frametitle{ConSol (Consistency Solver)---An Overview}
+
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide16_Picture_7.png}
+\end{center}
+\end{column}
+\begin{column}{0.50\textwidth}
+{\small
+\begin{tabular}{cc}
+\toprule
+\textbf{Answer} & \textbf{Probability} \\
+\midrule
+1 & 0.0 \\
+2 & 0.1 \\
+3 & 0.7 \\
+4 & 0.0 \\
+5 & 0.2 \\
+\bottomrule
+\end{tabular}
+}
+
+\vspace{0.3cm}
+Based on Wald's Sequential Probability Ratio Test (SPRT).
+
+\vspace{0.2cm}
+{\scriptsize A.\ Wald. Sequential Tests of Statistical Hypotheses. \textit{Ann.\ Math.\ Statist.} 16(2), 117--186. June 1945.}
+
+\vspace{0.1cm}
+{\scriptsize (Courtesy of Jaeyeon Lee)}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{ConSol: Comparable Accuracy to Best-Known Methods}
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figures/slide17_Picture_5.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{ConSol: Far Fewer Tokens ($\sim$80\% Token Reduction)}
+
+\begin{columns}[T]
+\begin{column}{0.65\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide17_Picture_5.png}
+\end{center}
+\end{column}
+\begin{column}{0.30\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide18_Picture_6.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{ConSol: Open Source}
+
+\begin{center}
+\includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]{figures/slide19_Picture_5.png}
+\end{center}
+
+\vspace{0.2cm}
+\url{https://github.com/LiuzLab/consol}
+\end{frame}
+
+% ================================================================================
+\subsection{Better: Rare Disease Diagnosis}
+% ================================================================================
+
+\begin{frame}
+\frametitle{Rare Disease Diagnosis: A Needle-in-a-Haystack Problem}
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figures/slide21_Picture_5.png}
+\end{center}
+
+\vspace{0.1cm}
+{\scriptsize (Alsentzer et al., \textit{npj Digital Medicine}, 2025)}
+\end{frame}
+
+\begin{frame}[shrink=10]
+\frametitle{AI-MARRVEL: A Rare-Disease Diagnosis Tool Taking a Wholistic View}
+
+\begin{columns}[T]
+\begin{column}{0.40\textwidth}
+\textbf{Pipeline Overview:}
+\begin{itemize}
+\item Data collection for building AI-MARRVEL
+\item Sequencing \& clinical annotation
+\item Feature engineering (data projection)
+\item Classifier
+\item Hyperparameter tuning
+\item Evaluation
+\item Data collection for validation
+\end{itemize}
+\end{column}
+\begin{column}{0.55\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide22_Picture_36.png}
+\end{center}
+\vspace{0.1cm}
+\begin{center}
+\includegraphics[width=0.4\textwidth]{figures/slide22_Picture_2.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[shrink=15]
+\frametitle{AI-MARRVEL: A State-of-the-Art Method}
+
+\begin{columns}[T]
+\begin{column}{0.65\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide23_Picture_4.jpg}
+\end{center}
+\end{column}
+\begin{column}{0.30\textwidth}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{figures/slide22_Picture_2.png}
+\end{center}
+\vspace{0.3cm}
+{\scriptsize Mao D, Liu C, Wang L, et al. AI-MARRVEL---A Knowledge-Driven AI System for Diagnosing Mendelian Disorders. \textit{NEJM AI}. 2024;1(5).}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{LA-MARRVEL: LLM-Augmented MARRVEL}
+
+\begin{center}
+\includegraphics[width=0.75\textwidth]{figures/slide25_Picture_5.png}
+\end{center}
+
+\vspace{0.2cm}
+{\footnotesize \url{https://arxiv.org/abs/2511.02263}}
+\end{frame}
+
+\begin{frame}
+\frametitle{AI-MARRVEL + LA-MARRVEL = Smarter, Context-Aware Genomic Insights}
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{figures/slide26_Picture_1.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{When LLMs Join Forces with AI-MARRVEL: Smarter Variant Discovery}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+{\small \textbf{Comparative Performance Analysis of LA-MARRVEL}}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide27_Picture_15.png}
+\end{center}
+\end{column}
+\begin{column}{0.48\textwidth}
+{\small \textbf{Performance Comparison of LA-MARRVEL and Vanilla LLM Models}}
+% Note: Original WMF figure (slide27_Picture_7.wmf) -- may need manual conversion
+\begin{center}
+% \includegraphics[width=\textwidth]{figures/slide27_Picture_7.wmf}
+\textit{[See WMF figure---convert manually if needed]}
+\end{center}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+{\scriptsize (Lee, Jeong, and Liu, ArXiv 2025)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Context Engineering: The Key Factor Behind the Performance Boost}
+
+\begin{columns}[T]
+\begin{column}{0.24\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide28_Picture_5.png}
+\end{center}
+\end{column}
+\begin{column}{0.24\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide28_Picture_7.png}
+\end{center}
+\end{column}
+\begin{column}{0.24\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide28_Picture_9.png}
+\end{center}
+\end{column}
+\begin{column}{0.24\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide28_Picture_11.png}
+\end{center}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+{\scriptsize (Lee, Jeong, and Liu, ArXiv 2025)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Case Study: LLM Correctly Re-Ranks SGP7 Through Clinical Context}
+
+\begin{center}
+\includegraphics[width=0.85\textwidth,height=0.7\textheight,keepaspectratio]{figures/slide29_Picture_5.png}
+\end{center}
+
+\vspace{0.1cm}
+{\scriptsize (Lee, Jeong, and Liu, ArXiv 2025)}
+\end{frame}
+
+\begin{frame}
+\frametitle{AI-MARRVEL: Try It Now}
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{figures/slide30_Picture_5.png}
+\end{center}
+
+\vspace{0.2cm}
+\url{https://ai.marrvel.org}
+\end{frame}
+
+% ================================================================================
+\subsection{Faster: MCP and Tool-Augmented LLMs}
+% ================================================================================
+
+% (This section connects to the MARRVEL-MCP content from qcb-ai-lecture-2)
+
+% ================================================================================
+\section{Trustworthy AI}
+% ================================================================================
+
+\begin{frame}
+\frametitle{Replication is Not Optional: Lessons from the HHV--Alzheimer's Debate}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide32_Image.png}
+\end{center}
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/slide32_Picture_2.png}
+\end{center}
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.5\textwidth]{figures/slide32_Picture_4.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Replication is Not Optional: Further Evidence}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide33_Image.png}
+\end{center}
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide33_Picture_2.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[shrink=5]
+\frametitle{VALIDATE ASD: Strengthening Autism Data Science Through Rigorous AI Validation}
+
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide34_Picture_4.png}
+\end{center}
+\vspace{0.2cm}
+{\small \textbf{Creating a Secured/Reproducible Workflow That Makes ASD AI Trustworthy}}
+\end{column}
+\begin{column}{0.50\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide34_image3.png.png}
+\end{center}
+\vspace{0.2cm}
+{\small \textbf{Building the Multi-Modal Infrastructure That Makes ASD AI Reliable}}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{VALIDATE ASD: Key Results}
+
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide34_Picture_4.png}
+\end{center}
+\end{column}
+\begin{column}{0.50\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{figures/slide36_Picture_17.png}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ================================================================================
+\section{Conclusion}
+% ================================================================================
+
+\begin{frame}
+\frametitle{Epil\={o}gus: Moving Toward Trustworthy and Effective AI in Precision Medicine}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Smarter:}
+\begin{itemize}
+\item Thinking LLMs (o1, DeepSeek-R1) bring new reasoning capabilities
+\item ConSol: comparable accuracy with $\sim$80\% fewer tokens
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Better:}
+\begin{itemize}
+\item AI-MARRVEL: state-of-the-art rare disease diagnosis
+\item LA-MARRVEL: LLM-augmented context-aware genomic insights
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Faster \& Greener:}
+\begin{itemize}
+\item Efficient inference through sequential testing
+\item Context engineering as a key performance multiplier
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Trustworthy:}
+\begin{itemize}
+\item Replication is not optional---rigorous validation matters
+\item VALIDATE ASD: building reliable, reproducible AI workflows
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ================================================================================
+% THANK YOU
+% ================================================================================
+
+\begin{frame}
+\frametitle{Thank You}
+
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{Collaborators:}
+\begin{itemize}
+\item Zhandong Liu, PhD
+\item Jaeyeon Lee
+\item Johnathan Jia
+\item Seon Young Kim
+\end{itemize}
+\end{column}
+\begin{column}{0.45\textwidth}
+\textbf{Funding Support:}
+{\scriptsize
+\begin{itemize}
+\item Chao Endowment
+\item The Huffington Foundation
+\item Jan and Dan Duncan Neurological Research Institute
+\item IDDRC
+\item Grant \#2023-332162
+\item CPRIT RP240131
+\item NIH 1R01HG011795-01
+\item NIH 1OT2OD040565-01
+\end{itemize}
+}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\begin{center}
+\Large Questions?
+\end{center}
+\end{frame}
+
+\end{document}
