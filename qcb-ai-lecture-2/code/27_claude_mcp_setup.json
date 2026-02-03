@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "test-mcp": {
+      "command": "/Users/hyun-hwanjeong/miniforge3/bin/python",
+      "args": [
+        "/Users/hyun-hwanjeong/Workspaces/slides/qcb-ai-lecture-2/code/26_test_mcp_example.py"
+      ]
+    }
+  }
+}
