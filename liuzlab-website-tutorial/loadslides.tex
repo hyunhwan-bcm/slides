@@ -1,0 +1,102 @@
+
+% Copyright (c) 2022 by Lars Spreng
+% This work is licensed under the Creative Commons Attribution 4.0 International License.
+% To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Add your packages and commands to this file
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Fonts
+\RequirePackage[scaled]{helvet} % for sans-serif slides
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+
+
+\usepackage{styles/elegantmacros}
+\usefolder{styles}
+\usetheme[style=lecture]{elegant}
+
+\newcommand{\makepart}[1]{ % For convenience
+\part{#1} \frame{\partpage}
+}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Figures
+\RequirePackage{booktabs}
+\RequirePackage{colortbl}
+\RequirePackage{ragged2e}
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{multirow}
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Figures
+\RequirePackage{wrapfig}
+\RequirePackage{graphicx}
+\RequirePackage{adjustbox}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Code listings
+\RequirePackage{listings}
+\RequirePackage{textcomp}
+
+\lstdefinestyle{terminalstyle}{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{black!5},
+  frame=single,
+  rulecolor=\color{black!30},
+  framesep=5pt,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=5pt,
+  xrightmargin=5pt,
+  aboveskip=8pt,
+  belowskip=4pt,
+  keywordstyle=\color{primary}\bfseries,
+  commentstyle=\color{Gray}\itshape,
+}
+
+\lstdefinestyle{yamlstyle}{
+  basicstyle=\ttfamily\scriptsize,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  rulecolor=\color{primary!30},
+  framesep=5pt,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+  xleftmargin=5pt,
+  xrightmargin=5pt,
+  aboveskip=8pt,
+  belowskip=4pt,
+  keywordstyle=\color{primary}\bfseries,
+  stringstyle=\color{secondary},
+  commentstyle=\color{Gray}\itshape,
+  morecomment=[l]{\#},
+}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% TikZ for diagrams
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit}
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

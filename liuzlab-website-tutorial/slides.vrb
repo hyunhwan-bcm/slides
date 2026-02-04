@@ -1,0 +1,25 @@
+\frametitle{Quick Reference: Complete Workflow}
+\begin{lstlisting}[style=terminalstyle]
+# 1. Fork & clone (one-time setup)
+gh repo fork LiuzLab/Liuzlab.github.io --clone
+cd Liuzlab.github.io
+
+# 2. Sync and branch
+git checkout main && git pull upstream main
+git checkout -b update/your-name-info
+
+# 3. Make your changes
+cp ~/my-photo.jpg src/assets/your-name.jpg
+# Edit src/content/team/role-your-name.md
+
+# 4. Stage, commit, push
+git add src/content/team/role-your-name.md
+git add src/assets/your-name.jpg
+git commit -m "Add your-name member profile"
+git push origin update/your-name-info
+
+# 5. Open a pull request
+gh pr create --title "Add your-name profile" \
+  --body "Added my profile." \
+  --repo LiuzLab/Liuzlab.github.io
+  \end{lstlisting}
