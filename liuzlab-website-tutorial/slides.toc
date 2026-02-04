@@ -1,0 +1,8 @@
+\beamer@sectionintoc {1}{Why: Learn the GitHub Ecosystem\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 2}{3}{0}{1}
+\beamer@sectionintoc {2}{How: Prerequisites\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 4}{5}{0}{2}
+\beamer@sectionintoc {3}{How: Fork, Clone, and Branch\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 5}{6}{0}{3}
+\beamer@sectionintoc {4}{How: Edit Your Member Profile\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 7}{8}{0}{4}
+\beamer@sectionintoc {5}{How: Commit, Push, and Create a PR\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 12}{13}{0}{5}
+\beamer@sectionintoc {6}{How: The Full Workflow at a Glance\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 19}{20}{0}{6}
+\beamer@sectionintoc {7}{Summary\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 20}{21}{0}{7}
+\beamer@sectionintoc {8}{Troubleshooting\unhbox \voidb@x \cleaders \hbox to0.8em{\hss .\hss }\hfill \kern \z@ 21}{22}{0}{8}

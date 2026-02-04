@@ -1,0 +1,626 @@
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Updating the Liu Lab Website: A Hands-On Tutorial
+% Teaches CLI-based GitHub PR workflow, then explains the WHY
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\documentclass[
+11pt,notheorems,hyperref={pdfauthor=whatever}
+]{beamer}
+
+\input{loadslides.tex} % Loads packages and some defined commands
+
+
+\title[
+Updating Our Lab Website
+]{Updating the Liu Lab Website \\ via GitHub Pull Requests}
+
+
+\author[
+Liu Lab
+]{
+    Hyun-Hwan Jeong
+}
+
+\institute{Liu Lab Meeting}
+\date{\today}
+
+\begin{document}
+
+% Generate title page
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+  \titlepage
+\end{frame}
+}
+\addtocounter{framenumber}{-1}
+
+
+%==============================================================================
+% MOTIVATION: THE WHY
+%==============================================================================
+
+\begin{frame}{Problem: Centralized Website Maintenance}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \textbf{\color{secondary} The old way (WordPress):}
+      \begin{itemize}
+        \item Server-based, needs constant maintenance
+        \item One person maintains the website
+        \item Everyone sends updates via email/Slack
+        \item Bottleneck --- slow updates
+        \item Single point of failure
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \textbf{\color{primary} The new way (Static Site):}
+      \begin{itemize}
+        \item Compile once, add items gradually
+        \item \textbf{You} update your own info via PR
+        \item No server maintenance needed
+        \item No bottleneck
+        \item Shared responsibility
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{1em}
+  \begin{exampleblock}{Goal}
+    Each lab member owns and maintains their own profile on the lab website.
+  \end{exampleblock}
+\end{frame}
+
+
+%==============================================================================
+\section{Why: Learn the GitHub Ecosystem}
+
+\begin{frame}{The GitHub Workflow Is Everywhere}
+  The fork $\rightarrow$ branch $\rightarrow$ PR workflow you just learned is \textbf{the standard} in:
+
+  \vspace{0.5em}
+  \begin{itemize}
+    \item \textbf{Open-source software} --- contributing to any project on GitHub
+    \item \textbf{Industry} --- how teams collaborate at Google, Meta, startups
+    \item \textbf{Research} --- collaborative papers, shared analysis pipelines
+    \item \textbf{Data science} --- reproducible workflows and version control
+  \end{itemize}
+
+  \vspace{1em}
+  \begin{block}{Transferable skills}
+    By updating the lab website, you practice the \textbf{exact same workflow} used to contribute to projects like \texttt{scikit-learn}, \texttt{pandas}, \texttt{pytorch}, etc.
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Key Concepts You're Learning}
+
+  \begin{center}
+  \begin{tikzpicture}[
+    node distance=1.2cm and 2.5cm,
+    concept/.style={
+      rectangle, rounded corners=4pt,
+      draw=primary, fill=primary!8,
+      text width=3cm, align=center,
+      minimum height=1cm,
+      font=\small\bfseries
+    },
+    arrow/.style={-{Stealth[length=6pt]}, thick, primary!70},
+  ]
+    \node[concept] (fork)    {Fork};
+    \node[concept, right=of fork]  (branch)  {Branch};
+    \node[concept, right=of branch] (commit)  {Commit};
+    \node[concept, below=of commit] (push)    {Push};
+    \node[concept, below=of branch] (pr)      {Pull Request};
+    \node[concept, below=of fork]   (merge)   {Merge};
+
+    \draw[arrow] (fork) -- (branch);
+    \draw[arrow] (branch) -- (commit);
+    \draw[arrow] (commit) -- (push);
+    \draw[arrow] (push) -- (pr);
+    \draw[arrow] (pr) -- (merge);
+  \end{tikzpicture}
+  \end{center}
+
+  \vspace{0.5em}
+  Each step maps to a \textbf{real-world collaboration pattern}: isolation (branch), review (PR), integration (merge).
+\end{frame}
+
+
+%==============================================================================
+% PART 1: THE HOW
+%==============================================================================
+
+\section{How: Prerequisites}
+
+\begin{frame}[fragile]{What You Need}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{primary} Tools}
+      \begin{itemize}
+        \item A \textbf{GitHub account}
+        \item \texttt{git} installed on your machine
+        \item \texttt{gh} --- the GitHub CLI (optional)
+        \item A text editor (VS Code, nano, vim, etc.)
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{primary} Knowledge (optional)}
+      \begin{itemize}
+        \item Basic terminal / command line
+        \item Markdown syntax
+        \item YAML frontmatter (we'll cover this)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{1em}
+  \begin{block}{Install GitHub CLI}
+    \begin{lstlisting}[style=terminalstyle]
+# macOS
+brew install gh
+
+# Windows
+winget install --id GitHub.cli
+
+# Then authenticate
+gh auth login
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+
+%==============================================================================
+\section{How: Fork, Clone, and Branch}
+
+\begin{frame}[fragile]{Step 1: Fork the Repository}
+  Go to \textcolor{primary}{\texttt{github.com/LiuzLab/Liuzlab.github.io}} and click \textbf{Fork}
+
+  \vspace{0.5em}
+  Or use the CLI:
+
+  \begin{lstlisting}[style=terminalstyle]
+# Fork the repository to your GitHub account
+gh repo fork LiuzLab/Liuzlab.github.io --clone
+  \end{lstlisting}
+
+  This will:
+  \begin{enumerate}
+    \item Create a copy (\textbf{fork}) under your GitHub account
+    \item Clone it to your local machine
+    \item Set up \texttt{origin} (your fork) and \texttt{upstream} (the lab repo)
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 2: Create a Branch}
+  \textbf{Never work directly on \texttt{main}.} Always create a branch:
+
+  \begin{lstlisting}[style=terminalstyle]
+# Navigate into the repo
+cd Liuzlab.github.io
+
+# Make sure you're up to date
+git checkout main
+git pull upstream main
+
+# Create a new branch for your changes
+git checkout -b update/your-name-info
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  \begin{alertblock}{Branch naming convention}
+    Use descriptive names: \texttt{update/jane-smith-info}, \texttt{fix/typo-in-bio}, \texttt{add/new-member-alex}
+  \end{alertblock}
+\end{frame}
+
+
+%==============================================================================
+\section{How: Edit Your Member Profile}
+
+\begin{frame}[fragile]{The Website Structure (Astro v6)}
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      The lab website is built with \textbf{Astro} --- a modern static site generator.
+
+      \vspace{0.5em}
+      Key directories:
+      \begin{itemize}
+        \item \texttt{src/content/team/} --- \textbf{Member profiles}
+        \item \texttt{src/assets/} --- Photos \& images
+        \item \texttt{src/pages/} --- Page layouts
+      \end{itemize}
+
+      \vspace{0.5em}
+      \textbf{\color{primary} File naming convention:}
+
+      \texttt{\color{secondary}\{2-3 letter role\}-\{first\}-\{last\}.md}
+
+      \vspace{0.3em}
+      {\scriptsize
+      \begin{tabular}{l l}
+        \texttt{prof-} & Professor \\
+        \texttt{ap-} & Assistant Professor \\
+        \texttt{pd-} & Postdoc \\
+        \texttt{phd-} & PhD Student \\
+        \texttt{ms-} & Master Student \\
+        \texttt{ug-} & Undergraduate \\
+        \texttt{ae-} & Alumni/Emeritus \\
+      \end{tabular}
+      }
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \begin{lstlisting}[style=terminalstyle, title={\scriptsize Repository layout}]
+Liuzlab.github.io/
+  src/
+    content/
+      team/
+        prof-zhandong-liu.md
+        ap-hyun-hwan-jeong.md
+        phd-emily-chen.md
+        ae-johnathan-jia.md
+        ...
+    assets/
+      zhandong-liu.jpg
+      hyun-hwan-jeong.jpg
+      ...
+    pages/
+      ...
+      \end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 3: Edit Your Profile --- Real Example}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{primary} YAML frontmatter} (metadata):
+      \begin{lstlisting}[style=yamlstyle, basicstyle=\ttfamily\tiny]
+---
+name: "Hyun-Hwan Jeong"
+role: "Assistant Professor"
+title: ["Assistant Professor"]
+avatar: "../../assets/hyun-hwan-jeong.jpg"
+bio: "Computational biology and
+  bioinformatics tool development"
+email: "hyun-hwan.jeong@bcm.edu"
+linkedin: "https://www.linkedin.com/
+  in/hyunhwan-jeong/"
+github: "https://github.com/hyunhwan-bcm"
+googleScholar: "https://scholar.google.
+  com/citations?user=RHsMwPUAAAAJ"
+weight: 2
+---
+      \end{lstlisting}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{\color{primary} What to fill in:}
+
+      \vspace{0.3em}
+      {\scriptsize
+      \begin{tabularx}{\textwidth}{l X}
+        \texttt{name} & \textbf{Your full name} \\[2pt]
+        \texttt{role} & Pick from the valid list \\[2pt]
+        \texttt{avatar} & Path to your photo \\[2pt]
+        \texttt{bio} & \textbf{One short sentence} about your research \\[2pt]
+        \texttt{email} & Your BCM email \\[2pt]
+        \texttt{linkedin} & Your profile URL \\[2pt]
+        \texttt{github} & Your GitHub URL \\[2pt]
+        \texttt{weight} & Lower = appears first \\[4pt]
+      \end{tabularx}
+      }
+
+      \vspace{0.5em}
+      \textbf{\color{secondary} Example file:}
+
+      {\tiny \texttt{github.com/LiuzLab/Liuzlab.github.io/blob/main/\\ src/content/team/ap-hyun-hwan-jeong.md}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 3 (cont.): The Markdown Body}
+  Below the \texttt{---} frontmatter, write your extended bio in \textbf{Markdown}:
+
+  \begin{lstlisting}[style=yamlstyle, basicstyle=\ttfamily\tiny]
+---
+... (frontmatter above) ...
+---
+Dr. Jeong is an Assistant Professor specializing in
+computational biology and bioinformatics.
+
+His notable contributions include **SalmonTE**, an ultra-fast
+pipeline for quantifying transposable elements from RNA-seq
+data, and **CRISPRcloud**, a cloud-based platform for CRISPR
+pooled screen analysis.
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  \begin{block}{Tips for the body text}
+    \begin{itemize}
+      \item Keep it to \textbf{2--3 short paragraphs}
+      \item Use \texttt{**bold**} for key tools or project names
+      \item This appears on your \textbf{full profile page}, not the team card
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Profile Fields Reference}
+  \begin{table}
+    \centering
+    \scriptsize
+    \begin{tabularx}{\textwidth}{l l X}
+      \toprule
+      \textbf{Field} & \textbf{Required?} & \textbf{Description} \\
+      \midrule
+      \texttt{name}           & Yes & Your full name \\
+      \texttt{role}           & Yes & One of: \textit{PhD Student}, \textit{Postdoc}, \textit{Master Student}, etc. \\
+      \texttt{avatar}         & Yes & Path to your photo in \texttt{src/assets/} \\
+      \texttt{title}          & No  & Academic titles (array) \\
+      \texttt{bio}            & No  & One-line description for the card \\
+      \texttt{email}          & No  & Your email address \\
+      \texttt{website}        & No  & Personal website URL \\
+      \texttt{linkedin}       & No  & LinkedIn profile URL \\
+      \texttt{github}         & No  & GitHub profile URL \\
+      \texttt{twitter}        & No  & Twitter/X URL \\
+      \texttt{googleScholar}  & No  & Google Scholar profile URL \\
+      \texttt{weight}         & No  & Display order (lower = first, default 100) \\
+      \bottomrule
+    \end{tabularx}
+  \end{table}
+
+  \vspace{0.5em}
+  {\footnotesize Valid \texttt{role} values: \textit{Principal Investigator, Professor, Associate Professor, Assistant Professor, Postdoc, Research Assistant, PhD Student, Master Student, Undergraduate, Alumni}}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 4: Add Your Photo}
+  \begin{enumerate}
+    \item Prepare a \textbf{square (1:1)} photo
+    \item Name it descriptively: \texttt{jane-smith.jpg}
+    \item Place it in the \texttt{src/assets/} directory
+  \end{enumerate}
+
+  \begin{lstlisting}[style=terminalstyle]
+# Copy your photo into the assets folder
+cp ~/Photos/my-headshot.jpg src/assets/jane-smith.jpg
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  Then reference it in your profile:
+
+  \begin{lstlisting}[style=yamlstyle]
+avatar: "../../assets/jane-smith.jpg"
+  \end{lstlisting}
+
+  \begin{block}{Photo tips}
+    Professional headshot preferred. Supported formats: \texttt{.jpg}, \texttt{.png}, \texttt{.webp}
+  \end{block}
+\end{frame}
+
+
+%==============================================================================
+\section{How: Commit, Push, and Create a PR}
+
+\begin{frame}[fragile]{Step 5: Stage and Commit Your Changes}
+  \begin{lstlisting}[style=terminalstyle]
+# Check what files you changed
+git status
+
+# Stage your profile and photo
+git add src/content/team/phd-jane-smith.md
+git add src/assets/jane-smith.jpg
+
+# Commit with a descriptive message
+git commit -m "Add Jane Smith member profile"
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  \begin{alertblock}{Commit message tips}
+    \begin{itemize}
+      \item Use imperative mood: ``Add'', ``Update'', ``Fix'' (not ``Added'')
+      \item Be specific: ``Update Jane's bio and photo'' not ``Update stuff''
+    \end{itemize}
+  \end{alertblock}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 6: Push to Your Fork}
+  \begin{lstlisting}[style=terminalstyle]
+# Push your branch to your fork (origin)
+git push origin update/your-name-info
+  \end{lstlisting}
+
+  \vspace{1em}
+  This uploads your branch to \textbf{your fork} on GitHub --- it does \textbf{not} affect the main lab repository yet.
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 7: Create a Pull Request}
+  \begin{lstlisting}[style=terminalstyle]
+# Create a PR from the command line
+gh pr create \
+  --title "Add Jane Smith member profile" \
+  --body "Added my profile and headshot photo.
+
+## Changes
+- New file: src/content/team/phd-jane-smith.md
+- New photo: src/assets/jane-smith.jpg
+
+## Preview
+Please preview the /team page after merging." \
+  --repo LiuzLab/Liuzlab.github.io
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  The \texttt{gh pr create} command:
+  \begin{itemize}
+    \item Opens a PR from \textbf{your fork} $\rightarrow$ \textbf{upstream main}
+    \item Adds a title and description
+    \item Returns a \textbf{URL} you can share
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Step 8 (Optional): Test Locally}
+  Want to preview the website before submitting a PR?
+
+  \begin{lstlisting}[style=terminalstyle]
+# Install dependencies (first time only)
+npm install
+
+# Start the local dev server
+npm run dev
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  Visit \texttt{http://localhost:4321/team} in your browser to see your profile.
+
+  \vspace{0.5em}
+  \begin{block}{Requirements}
+    Node.js 18+ and npm installed. Check with \lstinline[style=terminalstyle]{node --version}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]{Checking PR Status and Review}
+  \begin{lstlisting}[style=terminalstyle]
+# View your PR in the browser
+gh pr view --web
+
+# Check the status of CI checks
+gh pr checks
+
+# List all open PRs on the repo
+gh pr list --repo LiuzLab/Liuzlab.github.io
+  \end{lstlisting}
+
+  \vspace{0.5em}
+  \textbf{What happens next:}
+  \begin{enumerate}
+    \item A reviewer (maintainer) looks at your changes
+    \item They may request changes or approve
+    \item Once approved, the PR is \textbf{merged} into \texttt{main}
+    \item The website auto-deploys via GitHub Pages
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{What Your PR Should Look Like}
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]{figures/pr-example.png}
+  \end{center}
+
+  \vspace{0.5em}
+  Your PR should include a clear title, description, and show the files you changed.
+\end{frame}
+
+
+\begin{frame}{Expected Output: Team Page}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{figures/team-page.png}
+  \end{center}
+
+  \vspace{0.5em}
+  Your profile will appear on the lab website team page like this!
+\end{frame}
+
+
+%==============================================================================
+\section{How: The Full Workflow at a Glance}
+
+\begin{frame}[fragile]{Quick Reference: Complete Workflow}
+  \begin{lstlisting}[style=terminalstyle]
+# 1. Fork & clone (one-time setup)
+gh repo fork LiuzLab/Liuzlab.github.io --clone
+cd Liuzlab.github.io
+
+# 2. Sync and branch
+git checkout main && git pull upstream main
+git checkout -b update/your-name-info
+
+# 3. Make your changes
+cp ~/my-photo.jpg src/assets/your-name.jpg
+# Edit src/content/team/role-your-name.md
+
+# 4. Stage, commit, push
+git add src/content/team/role-your-name.md
+git add src/assets/your-name.jpg
+git commit -m "Add your-name member profile"
+git push origin update/your-name-info
+
+# 5. Open a pull request
+gh pr create --title "Add your-name profile" \
+  --body "Added my profile." \
+  --repo LiuzLab/Liuzlab.github.io
+  \end{lstlisting}
+\end{frame}
+
+
+%==============================================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{enumerate}
+    \item \textbf{How:} Fork $\rightarrow$ Branch $\rightarrow$ Edit $\rightarrow$ Commit $\rightarrow$ Push $\rightarrow$ PR
+    \item \textbf{Why:}
+      \begin{itemize}
+        \item[\color{primary}1.] \textbf{Decentralize} --- You own your profile. No bottleneck.
+        \item[\color{primary}2.] \textbf{Learn GitHub} --- Same workflow used everywhere in software and research.
+      \end{itemize}
+  \end{enumerate}
+
+  \vspace{1em}
+  \begin{block}{Your action item}
+    Update your profile on \texttt{LiuzLab/Liuzlab.github.io} and submit a PR!
+  \end{block}
+\end{frame}
+
+
+%==============================================================================
+\section{Troubleshooting}
+
+\begin{frame}{Stuck? Ask AI for Help!}
+  \textbf{\color{primary} If you encounter any Git/GitHub issues:}
+
+  \vspace{0.5em}
+  \begin{enumerate}
+    \item \textbf{Ask an AI assistant:}
+      \begin{itemize}
+        \item Claude, GitHub Copilot, or Gemini
+        \item Describe your error message or problem
+        \item Get step-by-step solutions
+      \end{itemize}
+    
+    \vspace{0.5em}
+    \item \textbf{Common issues they can help with:}
+      \begin{itemize}
+        \item Merge conflicts --- ``How do I resolve this conflict?''
+        \item Push rejected --- ``What does 'non-fast-forward' mean?''
+        \item Commit mistakes --- ``How do I undo my last commit?''
+        \item Branch issues --- ``How do I switch branches?''
+        \item Workflow guidance --- ``Put all changes to a new branch, then make PR''
+      \end{itemize}
+  \end{enumerate}
+
+  \vspace{0.5em}
+  \begin{alertblock}{Pro Tip}
+    Copy-paste error messages to AI. It will explain what happened and suggest fixes (force push, rebase, reset, etc.)
+  \end{alertblock}
+\end{frame}
+
+
+\begin{frame}
+  \centering
+  \vspace{2cm}
+  {\Huge \color{primary} Questions?}
+
+  \vspace{1.5cm}
+  {\large \texttt{github.com/LiuzLab/Liuzlab.github.io}}
+
+  \vspace{1cm}
+  {\large \href{https://liuzlab.github.io}{\textcolor{primary}{liuzlab.github.io}}}
+\end{frame}
+
+\end{document}
