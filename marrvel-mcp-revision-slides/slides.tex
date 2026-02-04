@@ -3,6 +3,12 @@
 \input{loadslides.tex}
 
 \usepackage{tabularx} \usepackage{array} \usepackage{booktabs}
+\usepackage{xcolor}
+
+% Define highlighting command for revised text
+\newcommand{\revised}[1]{\colorbox{yellow!30}{#1}}
+\newcommand{\revisedblock}[1]{\begin{tcolorbox}[colback=yellow!10,colframe=orange!60,boxrule=0.5pt,arc=2pt,left=3pt,right=3pt,top=3pt,bottom=3pt]#1\end{tcolorbox}}
+\usepackage{tcolorbox}
 
 
 \title[MARRVEL-MCP Revision]{MARRVEL-MCP Revision}
@@ -42,6 +48,14 @@ evaluation and tool analysis \item Concerns about gold standard reliability
 \end{itemize}
 
 \end{columns}
+
+\vspace{1em}
+\begin{center}
+\small
+\colorbox{green!20}{\textbf{ NEW }} = Newly added text \quad
+\colorbox{orange!20}{\textbf{ REVISED }} = Modified text \quad
+{\color{blue!70!black} Blue text} = Revision content
+\end{center}
 
 \end{frame}
 
@@ -116,10 +130,10 @@ RDguru & Rare disease clinical consultation & Knowledge-based conversational int
 %--- R1.1 revised text ---
 \begin{frame}{R1.1: Revised Manuscript Text}
 
-\textbf{Added to Background:}
+\textbf{Added to Background:} \colorbox{green!20}{\small NEW}
 
-\begin{quote} \scriptsize More recently, specialized biomedical AI agents have
-emerged as a transformative paradigm for clinical applications, moving beyond
+\begin{quote} \scriptsize \color{blue!80!black} More recently, specialized biomedical AI agents have
+\scriptsize \color{blue!70!black} emerged as a transformative paradigm for clinical applications, moving beyond
 passive question-answering to active problem-solving through autonomous tool use
 and multi-step reasoning [Gao 2024]. These systems include BioMNI for multimodal
 reasoning through literature-mining dynamic workflow composition [Huang 2025],
@@ -178,10 +192,10 @@ now used consistently throughout.
 %--- R1.2 revised abstract ---
 \begin{frame}{R1.2: Revised Abstract}
 
-\textbf{Revised in Abstract:}
+\textbf{Revised in Abstract:} \colorbox{orange!20}{\scriptsize\textbf{REVISED}}
 
 \begin{quote} \scriptsize This work demonstrates the impact of
-\textbf{tool-augmented context engineering}---the deliberate design of
+\scriptsize \color{blue!70!black} \textbf{tool-augmented context engineering}---the deliberate design of
 domain-aware tool environments and structured information scaffolding through
 executable function interfaces---in reshaping the role of model scale in
 genomics. MARRVEL-MCP equips LLMs with 39 tools spanning gene and variant
@@ -195,10 +209,10 @@ normalization, and multi-database synthesis from narrative queries. \end{quote}
 %--- R1.2 revised background ---
 \begin{frame}{R1.2: Revised Background}
 
-\textbf{Added to Background:}
+\textbf{Added to Background:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize Context-engineering, as recently formalized,
-encompasses the systematic optimization of information payloads for LLMs through
+\scriptsize \color{blue!70!black} encompasses the systematic optimization of information payloads for LLMs through
 the structured assembly of multiple context components, including instructions,
 knowledge, tools, memory, and system state [Mei 2025]. These multiple context
 components fundamentally distinguish context engineering from conventional
@@ -229,10 +243,10 @@ decisions analogous to those made by experienced computational biologists.
 %--- R1.2 revised discussion 1 ---
 \begin{frame}{R1.2: Revised Discussion (1/2)}
 
-\textbf{Added to Discussion:}
+\textbf{Added to Discussion:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize MARRVEL-MCP represents a specific instantiation of
-context engineering focused on tool-mediated database access. Recent taxonomies
+\scriptsize \color{blue!70!black} context engineering focused on tool-mediated database access. Recent taxonomies
 of context engineering [Mei 2025] identify several complementary approaches to
 optimizing LLM information payloads: (1) RAG systems that retrieve and re-rank
 text documents, (2) memory systems that maintain conversation state, (3)
@@ -319,10 +333,10 @@ review. The evaluation code is publicly available.
 %--- R1.3 revised text: benchmark ---
 \begin{frame}{R1.3: Revised Implementation -- Benchmark Dataset}
 
-\textbf{Added to Implementation:}
+\textbf{Added to Implementation:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize We manually constructed a benchmark dataset of 100
-questions designed to evaluate variant interpretation capabilities answerable
+\scriptsize \color{blue!70!black} questions designed to evaluate variant interpretation capabilities answerable
 using MARRVEL data sources. The benchmark encompassed diverse query types
 encountered in clinical genetics, from basic gene function lookups to complex
 multi-source queries requiring integration of variant databases, model organism
@@ -349,10 +363,10 @@ against the current state of the data sources at the time of evaluation.
 %--- R1.3 revised text: evaluation pipeline ---
 \begin{frame}{R1.3: Revised Implementation -- Evaluation Pipeline}
 
-\textbf{Added to Implementation:}
+\textbf{Added to Implementation:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize The evaluation pipeline consisted of three main
-stages: response generation, automated judging with manual review, and
+\scriptsize \color{blue!70!black} stages: response generation, automated judging with manual review, and
 statistical analysis.
 
 \vspace{0.2em} \textbf{Response Generation:} Each of the nine LLMs was tested
@@ -380,10 +394,10 @@ was judged to agree with the human-curated expected answer. \end{quote}
 %--- R1.3 revised text: result section ---
 \begin{frame}{R1.3: Revised Result Section}
 
-\textbf{Added to Results:}
+\textbf{Added to Results:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize Equipping lightweight models with MARRVEL-MCP
-substantially improved their accuracy on variant interpretation tasks, enabling
+\scriptsize \color{blue!70!black} substantially improved their accuracy on variant interpretation tasks, enabling
 smaller models to match or exceed the baseline performance of much larger
 systems. We evaluated this effect across nine LLMs ranging from 3B to 235B
 parameters using a benchmark of 45 expert-curated questions answerable using
@@ -407,7 +421,7 @@ domain customization, transparency, or reproducibility). \end{quote}
 
 \vspace{0.6em} \textbf{Action items:}
 \begin{itemize}
-\item Benchmark GPT-4o / GPT-o1 and Gemini on evaluation set
+\item Benchmark \textbf{Gemini 3.0} and \textbf{GPT-5} on evaluation set
 \item Report performance comparison table
 \item Justify added value: domain tools, cost, transparency, reproducibility
 \end{itemize}
@@ -512,10 +526,10 @@ biological reasoning constraints into the tool environment.
 %--- R2.1 revised text: background ---
 \begin{frame}{R2.1: Revised Background (1/2)}
 
-\textbf{Added to Background:}
+\textbf{Added to Background:} \colorbox{green!20}{\scriptsize\textbf{NEW}}
 
 \begin{quote} \scriptsize
-Context-engineering, as recently formalized, encompasses the systematic
+\scriptsize \color{blue!70!black} Context-engineering, as recently formalized, encompasses the systematic
 optimization of information payloads for LLMs through the structured assembly
 of multiple context components, including instructions, knowledge, tools,
 memory, and system state [Mei 2025]. These multiple context components
